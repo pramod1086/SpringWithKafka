@@ -37,6 +37,6 @@ public class Producer {
             });
         }
 
-      //  this.kafkaTemplate.send(TOPIC, message);
+        //  this.kafkaTemplate.send(TOPIC, message);
     }
 }
