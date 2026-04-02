@@ -1,5 +1,6 @@
 package com.pramod.springwithkafka.kafka;
 
+import com.pramod.springwithkafka.model.User;
 import org.apache.kafka.clients.producer.Partitioner;
 import org.apache.kafka.common.Cluster;
 import org.apache.kafka.common.PartitionInfo;
@@ -8,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Custom Kafka partitioner using username, id, and age.
- * Records with the same (username, id, age) go to the same partition.
+ * Custom Kafka partitioner for {@link UserPartitionKey} or {@link User} keys.
+ * Same key → same partition; {@link User} uses name and age in the routing hash.
  */
 public class UserPartitionPartitioner implements Partitioner {
 
@@ -23,6 +24,9 @@ public class UserPartitionPartitioner implements Partitioner {
         String partitionKey;
         if (key instanceof UserPartitionKey) {
             partitionKey = ((UserPartitionKey) key).toPartitionKey();
+        } else if (key instanceof User) {
+            User u = (User) key;
+            partitionKey = u.getName() + ":" + u.getAge();
         } else if (key != null) {
             partitionKey = key.toString();
         } else {

@@ -19,7 +19,7 @@ public class Consumer {
     }
 
     @KafkaListener(topics = "users", groupId = "group")
-    public void consumes(String message,  @Header(KafkaHeaders.RECEIVED_PARTITION_ID ) int header){
+    public void consumes(String message, @Header(KafkaHeaders.RECEIVED_PARTITION) int header) {
         logger.info(String.format("Second Consumer Consumed message -&gt; %s", message));
     }
 

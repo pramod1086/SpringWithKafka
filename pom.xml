@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>2.7.6</version>
+		<version>4.0.0</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.pramod</groupId>
@@ -14,7 +14,12 @@
 	<name>SpringWithKafka</name>
 	<description>SpringWithKafka</description>
 	<properties>
+		<!--
+		  Bytecode level for javac. Keep this aligned with your minimum supported runtime (e.g. 11 or 17).
+		-->
 		<java.version>11</java.version>
+		<!-- Newer Lombok for editing on JDK 21+ (IDE / TypeTag.UNKNOWN). -->
+		<lombok.version>1.18.44</lombok.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -22,8 +27,12 @@
 			<artifactId>spring-boot-starter</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka</artifactId>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-kafka</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.kafka</groupId>
+			<artifactId>kafka-streams</artifactId>
 		</dependency>
 
 		<dependency>
@@ -47,12 +56,34 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+			<artifactId>spring-boot-starter-data-elasticsearch</artifactId>
+		</dependency>
+		<!--
+		  Spring Kafka JsonSerializer still uses com.fasterxml.jackson.databind.ObjectMapper.
+		  Spring Boot 4 defaults to Jackson 3 (tools.jackson); add Jackson 2 for the raw KafkaProducer in KafkaProducerService.
+		-->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
 		</dependency>
 	</dependencies>
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<release>${java.version}</release>
+					<annotationProcessorPaths>
+						<path>
+							<groupId>org.projectlombok</groupId>
+							<artifactId>lombok</artifactId>
+							<version>${lombok.version}</version>
+						</path>
+					</annotationProcessorPaths>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
