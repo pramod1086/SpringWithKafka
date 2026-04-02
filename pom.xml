@@ -96,6 +96,30 @@
 					</excludes>
 				</configuration>
 			</plugin>
+			<!--
+			  Plain Java mains (no Spring Boot):
+			  mvn -q compile exec:java
+			  mvn -q compile exec:java@kafka-elasticsearch-indexer
+			-->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.6.2</version>
+				<configuration>
+					<mainClass>com.pramod.springwithkafka.standalone.PlainKafkaConsumer</mainClass>
+				</configuration>
+				<executions>
+					<execution>
+						<id>kafka-elasticsearch-indexer</id>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>com.pramod.springwithkafka.standalone.PlainKafkaElasticsearchIndexer</mainClass>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
 
