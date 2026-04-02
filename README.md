@@ -100,12 +100,71 @@ Server port is configured in `src/main/resources/application.properties`.
 
 - **Topics indexed:** `users`, `transactions`.
 - **Consumer group:** `elasticsearch-indexer` (override with `elasticsearch.kafka.consumer-group` in `application.properties`).
-- **Index:** `kafka-messages` — each document has an id (UUID), `topic`, `payload` (the Kafka value string), and `indexedAtEpochMillis`.
+- **Index:** `kafka-messages` — each document has an id (UUID), `topic` (keyword), `payload` (text, the Kafka value string), and `indexedAtEpochMillis` (long).
 
-Example search after producing messages:
+### Check the cluster
+
+```bash
+curl -s http://localhost:9200/
+```
+
+You should see JSON with `cluster_name` and `version`.
+
+### Check the index
+
+Index metadata (mappings, settings):
+
+```bash
+curl -s http://localhost:9200/kafka-messages
+```
+
+HTTP status only (e.g. `200` if the index exists):
+
+```bash
+curl -s -o /dev/null -w "%{http_code}\n" http://localhost:9200/kafka-messages
+```
+
+### Search with `curl`
+
+**Match all documents** (pretty-printed):
+
+```bash
+curl -s -H "Content-Type: application/json" \
+  "http://localhost:9200/kafka-messages/_search?pretty" \
+  -d '{"query":{"match_all":{}}}'
+```
+
+**Search text in `payload`:**
+
+```bash
+curl -s -H "Content-Type: application/json" \
+  "http://localhost:9200/kafka-messages/_search?pretty" \
+  -d '{"query":{"match":{"payload":"your text here"}}}'
+```
+
+**Filter by `topic` (exact keyword):**
+
+```bash
+curl -s -H "Content-Type: application/json" \
+  "http://localhost:9200/kafka-messages/_search?pretty" \
+  -d '{"query":{"term":{"topic":"users"}}}'
+```
+
+**Quick search (GET, no body)** — returns hits; useful for a fast sanity check:
 
 ```bash
 curl -s "http://localhost:9200/kafka-messages/_search?pretty"
+```
+
+### Kibana
+
+If you run Kibana against the same cluster, use **Dev Tools** and run the same queries, for example:
+
+```http
+GET kafka-messages/_search
+{
+  "query": { "match_all": {} }
+}
 ```
 
 Unit tests disable Elasticsearch via `src/test/resources/application.properties` so the Spring context loads without a running cluster.

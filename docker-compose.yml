@@ -4,8 +4,9 @@ services:
     ports:
       - "9092:9092"
 
+  # Keep in sync with co.elastic.clients:elasticsearch-java from Spring Boot (9.x); ES 8 servers break the 9.x client (e.g. indices.exists → 400, empty body).
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    image: docker.elastic.co/elasticsearch/elasticsearch:9.2.1
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
