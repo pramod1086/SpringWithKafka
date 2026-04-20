@@ -28,8 +28,14 @@ public final class PlainKafkaConsumer {
 	private static final String BOOTSTRAP_SERVERS = "localhost:9092";
 	private static final String GROUP_ID = "plain-java-consumer";
 
-	public static void main(String[] args) {
-		List<String> topics = args.length > 0 ? Arrays.asList(args) : List.of("users");
+	private static final Duration DEFAULT_POLL_TIMEOUT = Duration.ofMillis(500);
+
+	/**
+	 * Blocking poll loop shared with {@link PlainKafkaConsumerLifecycle} when running under Spring Boot.
+	 */
+	public static void runPollLoop(KafkaConsumer<String, String> consumer, Duration pollTimeout) {
+
+		List<String> topics = List.of("users");
 
 		Properties props = new Properties();
 		props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
@@ -39,7 +45,7 @@ public final class PlainKafkaConsumer {
 		props.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
 		props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
 
-		try (KafkaConsumer<String, String> consumer = new KafkaConsumer<>(props)) {
+		try (KafkaConsumer<String, String> consumers = new KafkaConsumer<>(props)) {
 			consumer.subscribe(topics);
 			log.info("Subscribed to {} (bootstrap={}, group={})", topics, BOOTSTRAP_SERVERS, GROUP_ID);
 
@@ -49,18 +55,19 @@ public final class PlainKafkaConsumer {
 			}));
 
 			while (true) {
-				try {
-					ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(500));
-					for (ConsumerRecord<String, String> r : records) {
-						log.info("Consumed topic={} partition={} offset={} key={} value={}",
-								r.topic(), r.partition(), r.offset(), r.key(), r.value());
-					}
-				} catch (WakeupException e) {
-					log.info("Consumer woken up, closing");
-					break;
+			try {
+				ConsumerRecords<String, String> records = consumer.poll(pollTimeout);
+				for (ConsumerRecord<String, String> r : records) {
+					log.info("Consumed topic={} partition={} offset={} key={} value={}",
+							r.topic(), r.partition(), r.offset(), r.key(), r.value());
 				}
+			} catch (WakeupException e) {
+				log.info("Consumer woken up, closing poll loop");
+				break;
 			}
 		}
+	}
+
 	}
 
 	private PlainKafkaConsumer() {

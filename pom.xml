@@ -97,8 +97,8 @@
 				</configuration>
 			</plugin>
 			<!--
-			  Plain Java mains (no Spring Boot):
-			  mvn -q compile exec:java
+			  Plain consumer (no Spring): mvn -q compile exec:java
+			  Spring Boot + plain poll lifecycle: mvn spring-boot:run
 			  mvn -q compile exec:java@kafka-elasticsearch-indexer
 			-->
 			<plugin>
