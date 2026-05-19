@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.boot.autoconfigure.kafka.KafkaProperties;
+import org.springframework.boot.kafka.autoconfigure.KafkaProperties;
 import org.springframework.context.SmartLifecycle;
 import org.springframework.stereotype.Component;
 
@@ -53,7 +53,7 @@ public class PlainKafkaConsumerLifecycle implements SmartLifecycle {
 			return;
 		}
 		List<String> topics = parseTopics(this.topicsCsv);
-		Map<String, Object> configs = new HashMap<>(this.kafkaProperties.buildConsumerProperties(null));
+		Map<String, Object> configs = new HashMap<>(this.kafkaProperties.buildConsumerProperties());
 		configs.put(ConsumerConfig.GROUP_ID_CONFIG, this.groupId);
 
 		this.running = true;
