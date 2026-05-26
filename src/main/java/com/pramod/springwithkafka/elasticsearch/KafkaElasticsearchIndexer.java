@@ -1,5 +1,6 @@
 package com.pramod.springwithkafka.elasticsearch;
 
+import com.pramod.springwithkafka.commerce.CommerceTopics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 /**
  * Indexes Kafka record values into Elasticsearch (separate consumer group from other listeners).
+ * Topics: {@code users}, {@code transactions}, and commerce events ({@link com.pramod.springwithkafka.commerce.CommerceTopics}).
  */
 @Service
 @ConditionalOnBean(IndexedKafkaMessageRepository.class)
@@ -27,7 +29,12 @@ public class KafkaElasticsearchIndexer {
 	}
 
 	@KafkaListener(
-			topics = { "users", "transactions" },
+			topics = {
+					"users",
+					"transactions",
+					CommerceTopics.CATALOG_EVENTS,
+					CommerceTopics.CART_EVENTS
+			},
 			groupId = "${elasticsearch.kafka.consumer-group:elasticsearch-indexer}"
 	)
 	public void index(String payload, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {

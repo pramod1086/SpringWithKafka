@@ -1,6 +1,7 @@
 package com.pramod.springwithkafka.standalone;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pramod.springwithkafka.commerce.CommerceTopics;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
@@ -30,7 +31,9 @@ import java.util.UUID;
  * <p>
  * Defaults: bootstrap {@code localhost:9092}, Elasticsearch {@code http://localhost:9200}, group
  * {@code plain-elasticsearch-indexer} (change if you want to share the load with the Spring consumer using
- * {@code elasticsearch-indexer}).
+ * {@code elasticsearch-indexer}). Subscribes to {@code users}, {@code transactions},
+ * {@link com.pramod.springwithkafka.commerce.CommerceTopics#CATALOG_EVENTS}, and
+ * {@link com.pramod.springwithkafka.commerce.CommerceTopics#CART_EVENTS} unless you pass topic names as {@code main} args.
  * <p>
  * Run: {@code mvn -q compile exec:java -Dexec.mainClass=com.pramod.springwithkafka.standalone.PlainKafkaElasticsearchIndexer}
  * <p>
@@ -47,7 +50,11 @@ public final class PlainKafkaElasticsearchIndexer {
 	private static final String ELASTICSEARCH_URI = System.getProperty("elasticsearch.uri", "http://localhost:9200");
 	private static final String GROUP_ID = System.getProperty("kafka.es.consumer.group", "plain-elasticsearch-indexer");
 
-	private static final List<String> TOPICS = List.of("users", "transactions");
+	private static final List<String> TOPICS = List.of(
+			"users",
+			"transactions",
+			CommerceTopics.CATALOG_EVENTS,
+			CommerceTopics.CART_EVENTS);
 
 	private static final ObjectMapper MAPPER = new ObjectMapper();
 	private static final HttpClient HTTP = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
