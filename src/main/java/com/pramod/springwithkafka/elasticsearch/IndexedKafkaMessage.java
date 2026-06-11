@@ -14,6 +14,10 @@ public class IndexedKafkaMessage {
 	@Field(type = FieldType.Keyword)
 	private String topic;
 
+	/** Kafka record key when string-serialized (same as producers use). */
+	@Field(type = FieldType.Keyword)
+	private String messageKey;
+
 	@Field(type = FieldType.Text)
 	private String payload;
 
@@ -23,9 +27,10 @@ public class IndexedKafkaMessage {
 	protected IndexedKafkaMessage() {
 	}
 
-	public IndexedKafkaMessage(String id, String topic, String payload, long indexedAtEpochMillis) {
+	public IndexedKafkaMessage(String id, String topic, String messageKey, String payload, long indexedAtEpochMillis) {
 		this.id = id;
 		this.topic = topic;
+		this.messageKey = messageKey;
 		this.payload = payload;
 		this.indexedAtEpochMillis = indexedAtEpochMillis;
 	}
@@ -36,6 +41,10 @@ public class IndexedKafkaMessage {
 
 	public String getTopic() {
 		return topic;
+	}
+
+	public String getMessageKey() {
+		return messageKey;
 	}
 
 	public String getPayload() {

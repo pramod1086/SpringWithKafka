@@ -37,9 +37,16 @@ public class KafkaElasticsearchIndexer {
 			},
 			groupId = "${elasticsearch.kafka.consumer-group:elasticsearch-indexer}"
 	)
-	public void index(String payload, @Header(KafkaHeaders.RECEIVED_TOPIC) String topic) {
+	public void index(
+			String payload,
+			@Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
+			@Header(name = KafkaHeaders.RECEIVED_KEY, required = false) String messageKey) {
 		String id = UUID.randomUUID().toString();
-		repository.save(new IndexedKafkaMessage(id, topic, payload, Instant.now().toEpochMilli()));
+		repository.save(new IndexedKafkaMessage(id, topic, emptyToNull(messageKey), payload, Instant.now().toEpochMilli()));
 		log.info("Indexed Kafka message to Elasticsearch topic={} id={}", topic, id);
+	}
+
+	private static String emptyToNull(String key) {
+		return (key == null || key.isEmpty()) ? null : key;
 	}
 }

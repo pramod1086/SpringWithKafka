@@ -87,7 +87,7 @@ public final class PlainKafkaElasticsearchIndexer {
 				try {
 					ConsumerRecords<String, String> records = consumer.poll(Duration.ofMillis(500));
 					for (ConsumerRecord<String, String> r : records) {
-						indexRecord(esBase, r.topic(), r.value());
+						indexRecord(esBase, r.topic(), r.key(), r.value());
 					}
 				} catch (WakeupException e) {
 					log.info("Consumer woken up, closing");
@@ -97,7 +97,7 @@ public final class PlainKafkaElasticsearchIndexer {
 		}
 	}
 
-	private static void indexRecord(String esBase, String topic, String payload) {
+	private static void indexRecord(String esBase, String topic, String messageKey, String payload) {
 		String id = UUID.randomUUID().toString();
 		long indexedAt = Instant.now().toEpochMilli();
 
@@ -105,6 +105,9 @@ public final class PlainKafkaElasticsearchIndexer {
 		doc.put("_class", DOCUMENT_CLASS);
 		doc.put("id", id);
 		doc.put("topic", topic);
+		if (messageKey != null && !messageKey.isEmpty()) {
+			doc.put("messageKey", messageKey);
+		}
 		doc.put("payload", payload);
 		doc.put("indexedAtEpochMillis", indexedAt);
 

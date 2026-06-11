@@ -231,9 +231,22 @@ curl -s http://localhost:9000/api/commerce/carts/<CART_ID>
 
 ## Elasticsearch (Kafka → index)
 
+Full details: **[ELASTICSEARCH.md](ELASTICSEARCH.md)** (architecture, profile, consumer groups, index changes).
+
 - **Topics indexed:** `users`, `transactions`, `commerce.catalog.events`, `commerce.cart.events`.
 - **Consumer group:** `elasticsearch-indexer` (override with `elasticsearch.kafka.consumer-group` in `application.properties`).
-- **Index:** `kafka-messages` — each document has an id (UUID), `topic` (keyword), `payload` (text, the Kafka value string), and `indexedAtEpochMillis` (long).
+- **Index:** `kafka-messages` — each document has an `id` (UUID), `topic` (keyword), optional `messageKey` (keyword, Kafka record key), `payload` (text, the Kafka value string), and `indexedAtEpochMillis` (long).
+
+### Search from the app (with `elasticsearch` profile)
+
+When repositories are enabled (`spring-boot.run.profiles=elasticsearch`):
+
+```bash
+curl -s "http://localhost:9000/api/elasticsearch/messages?topic=commerce.cart.events&page=0&size=5"
+curl -s "http://localhost:9000/api/elasticsearch/messages?q=CART_CREATED&page=0&size=5"
+```
+
+Parameters: **`topic`** (exact, optional), **`q`** (match inside `payload`, optional) — at least one required; **`page`**, **`size`** (max 100).
 
 ### Check the cluster
 
@@ -312,5 +325,5 @@ By default `spring.data.elasticsearch.repositories.enabled=false` in `applicatio
 
 - `KafkaProducerService` — producer config, optional explicit partition.
 - `com.pramod.springwithkafka.kafka.UserPartitionPartitioner` — routing for `User` and `UserPartitionKey` keys.
-- `com.pramod.springwithkafka.elasticsearch` — `IndexedKafkaMessage`, `IndexedKafkaMessageRepository`, `KafkaElasticsearchIndexer`.
+- `com.pramod.springwithkafka.elasticsearch` — indexing (`KafkaElasticsearchIndexer`), document `IndexedKafkaMessage`, repository, **`IndexedKafkaMessageSearchService`**, **`ElasticsearchSearchRestController`** (`/api/elasticsearch/messages`). See **[ELASTICSEARCH.md](ELASTICSEARCH.md)**.
 - `com.pramod.springwithkafka.commerce` — catalog/cart/store services, Kafka event publishers, `CommerceTopics`, REST in `commerce.web`.
